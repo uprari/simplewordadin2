@@ -1,0 +1,118 @@
+' VBA Macro for Microsoft Word
+' Creates a UserForm with three buttons for fetching, displaying, and writing data
+
+' Global variable to store fetched data
+Public fetchedData As String
+
+' Create the UserForm
+Sub CreateUserForm()
+    Dim frm As Object
+    Dim btnFetch As Object
+    Dim btnDisplay As Object
+    Dim btnWrite As Object
+    Dim lblToken As Object
+    Dim lblUrl As Object
+    Dim txtToken As Object
+    Dim txtUrl As Object
+    
+    ' Create UserForm
+    Set frm = ThisDocument.VBProject.VBComponents.Add(3) ' 3 = vbext_ct_MSForm
+    frm.Properties("Caption") = "Data Fetcher"
+    frm.Properties("Width") = 300
+    frm.Properties("Height") = 200
+    
+    ' Add Token Label
+    Set lblToken = frm.Designer.Controls.Add("Forms.Label.1")
+    lblToken.Caption = "Token:"
+    lblToken.Left = 10
+    lblToken.Top = 10
+    lblToken.Width = 50
+    
+    ' Add Token TextBox
+    Set txtToken = frm.Designer.Controls.Add("Forms.TextBox.1")
+    txtToken.Name = "txtToken"
+    txtToken.Left = 60
+    txtToken.Top = 10
+    txtToken.Width = 200
+    
+    ' Add URL Label
+    Set lblUrl = frm.Designer.Controls.Add("Forms.Label.1")
+    lblUrl.Caption = "URL:"
+    lblUrl.Left = 10
+    lblUrl.Top = 40
+    lblUrl.Width = 50
+    
+    ' Add URL TextBox
+    Set txtUrl = frm.Designer.Controls.Add("Forms.TextBox.1")
+    txtUrl.Name = "txtUrl"
+    txtUrl.Left = 60
+    txtUrl.Top = 40
+    txtUrl.Width = 200
+    
+    ' Add Fetch Button
+    Set btnFetch = frm.Designer.Controls.Add("Forms.CommandButton.1")
+    btnFetch.Caption = "Fetch Data"
+    btnFetch.Left = 10
+    btnFetch.Top = 80
+    btnFetch.Width = 80
+    btnFetch.Height = 30
+    
+    ' Add Display Button
+    Set btnDisplay = frm.Designer.Controls.Add("Forms.CommandButton.1")
+    btnDisplay.Caption = "Display Data"
+    btnDisplay.Left = 100
+    btnDisplay.Top = 80
+    btnDisplay.Width = 80
+    btnDisplay.Height = 30
+    
+    ' Add Write Button
+    Set btnWrite = frm.Designer.Controls.Add("Forms.CommandButton.1")
+    btnWrite.Caption = "Write to Doc"
+    btnWrite.Left = 190
+    btnWrite.Top = 80
+    btnWrite.Width = 80
+    btnWrite.Height = 30
+    
+    ' Add code to UserForm
+    Dim frmCode As Object
+    Set frmCode = frm.CodeModule
+    frmCode.InsertLines 1, _
+        "Private Sub CommandButton1_Click()" & vbCrLf & _
+        "    Dim http As Object" & vbCrLf & _
+        "    Set http = CreateObject(""MSXML2.XMLHTTP"")" & vbCrLf & _
+        "    http.Open ""GET"", txtUrl.Value, False" & vbCrLf & _
+        "    http.setRequestHeader ""Authorization"", ""Bearer "" & txtToken.Value" & vbCrLf & _
+        "    http.Send" & vbCrLf & _
+        "    If http.Status = 200 Then" & vbCrLf & _
+        "        fetchedData = http.responseText" & vbCrLf & _
+        "        MsgBox ""Data fetched successfully!"", 64" & vbCrLf & _
+        "    Else" & vbCrLf & _
+        "        MsgBox ""Error fetching data: "" & http.Status, 16" & vbCrLf & _
+        "    End If" & vbCrLf & _
+        "End Sub" & vbCrLf & _
+        "" & vbCrLf & _
+        "Private Sub CommandButton2_Click()" & vbCrLf & _
+        "    If fetchedData = """" Then" & vbCrLf & _
+        "        MsgBox ""Please fetch data first!"", 48" & vbCrLf & _
+        "    Else" & vbCrLf & _
+        "        MsgBox fetchedData, 64, ""Fetched Data""" & vbCrLf & _
+        "    End If" & vbCrLf & _
+        "End Sub" & vbCrLf & _
+        "" & vbCrLf & _
+        "Private Sub CommandButton3_Click()" & vbCrLf & _
+        "    If fetchedData = """" Then" & vbCrLf & _
+        "        MsgBox ""Please fetch data first!"", 48" & vbCrLf & _
+        "    Else" & vbCrLf & _
+        "        Selection.TypeText Text:=fetchedData" & vbCrLf & _
+        "        MsgBox ""Data written to document!"", 64" & vbCrLf & _
+        "    End If" & vbCrLf & _
+        "End Sub"
+    
+    ' Show the UserForm
+    VBA.UserForms.Add(frm.Name).Show
+End Sub
+
+' Macro entry point
+Sub RunDataFetcher()
+    Call CreateUserForm
+End Sub
